@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+   <xsd:complexType name="personFile">
+      <xsd:sequence>
+         <xsd:element name="ZGLV" type="personZglv"/>
+         <xsd:element name="PERS" type="person" maxOccurs="unbounded"/>
+      </xsd:sequence>
+   </xsd:complexType>
+   <xsd:complexType name="personZglv">
+      <xsd:sequence>
+         <xsd:element name="VERSION" type="xsd:string"/>
+         <xsd:element name="DATA" type="xsd:date"/>
+         <xsd:element name="FILENAME" type="xsd:string"/>
+         <xsd:element name="FILENAME1" type="xsd:string"/>
+      </xsd:sequence>
+   </xsd:complexType>
+   <xsd:complexType name="person">
+      <xsd:sequence>
+         <xsd:element name="ID_PAC" type="xsd:string"/>
+         <xsd:element name="FAM" type="xsd:string" minOccurs="0"/>
+         <xsd:element name="IM" type="xsd:string" minOccurs="0"/>
+         <xsd:element name="OT" type="xsd:string" minOccurs="0"/>
+         <xsd:element name="W" type="xsd:short"/>
+         <xsd:element name="DR" type="xsd:date"/>
+         <xsd:element name="DOST" type="xsd:short" minOccurs="0" maxOccurs="unbounded"/>
+         <xsd:element name="TEL" type="xsd:string" minOccurs="0"/>
+         <xsd:element name="FAM_P" type="xsd:string" minOccurs="0"/>
+         <xsd:element name="IM_P" type="xsd:string" minOccurs="0"/>
+         <xsd:element name="OT_P" type="xsd:string" minOccurs="0"/>
+         <xsd:element name="W_P" type="xsd:short" minOccurs="0"/>
+         <xsd:element name="DR_P" type="xsd:date" minOccurs="0"/>
+         <xsd:element name="DOST_P" type="xsd:short" minOccurs="0" maxOccurs="unbounded"/>
+         <xsd:element name="MR" type="xsd:string" minOccurs="0"/>
+         <xsd:element name="DOCTYPE" type="xsd:string" minOccurs="0"/>
+         <xsd:element name="DOCSER" type="xsd:string" minOccurs="0"/>
+         <xsd:element name="DOCNUM" type="xsd:string" minOccurs="0"/>
+         <xsd:element name="DOCDATE" type="xsd:date" minOccurs="0"/>
+         <xsd:element name="DOCORG" type="xsd:string" minOccurs="0"/>
+         <xsd:element name="SNILS" type="xsd:string" minOccurs="0"/>
+         <xsd:element name="OKATOG" type="xsd:string" minOccurs="0"/>
+         <xsd:element name="OKATOP" type="xsd:string" minOccurs="0"/>
+         <xsd:element name="COMENTP" type="xsd:string" minOccurs="0"/>
+         <xsd:element name="GRZ1" type="xsd:short" minOccurs="0"/>
+         <xsd:element name="SRB" type="xsd:short" minOccurs="0"/>
+      </xsd:sequence>
+   </xsd:complexType>
+   <xsd:element name="PERS_LIST" type="personFile"/>
+</xsd:schema>
