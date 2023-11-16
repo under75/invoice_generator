@@ -1,11 +1,13 @@
 package ru.sartfoms.invoicegenerator.entity;
 
 import javax.persistence.Entity;
+import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
 @Table(name = "FO11", schema = "LPUOWNER")
 public class F011 {
+	@Id
 	private Integer iddoc;
 	private Integer docser;
 	private Integer docnum;

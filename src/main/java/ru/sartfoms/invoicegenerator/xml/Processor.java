@@ -13,6 +13,8 @@ import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import javax.xml.namespace.QName;
+
 import org.apache.commons.io.FileUtils;
 import org.eclipse.persistence.jaxb.JAXBContextFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -101,7 +103,7 @@ public class Processor {
 					svedMedpomMono = Mono.just(svedMedpom);
 				}
 			}
-			Flk flk =  createFlk(zipfile);
+			Flk flk = createFlk(zipfile);
 			Mono.zip(personFileMono, medrabFileMono, svedMedpomMono, Mono.just(flk)).subscribe(m -> {
 				q15ValidatorL.validate(m);
 				q15ValidatorH.validate(m);
@@ -121,7 +123,7 @@ public class Processor {
 		Flk flk = new Flk();
 		flk.setFNAME(fName);
 		flk.setFNAMEI(fNameI);
-		
+
 		return flk;
 	}
 
@@ -136,8 +138,9 @@ public class Processor {
 				null);
 		Marshaller jaxbMarshaller = context.createMarshaller();
 		jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+		JAXBElement<Flk> jaxbElement = new JAXBElement<Flk>(new QName("", "FLK_P"), Flk.class, flk);
 
-		jaxbMarshaller.marshal(flk, System.out);
+		jaxbMarshaller.marshal(jaxbElement, System.out);
 	}
 
 }
