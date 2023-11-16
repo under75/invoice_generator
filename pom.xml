@@ -47,6 +47,10 @@
 			<scope>runtime</scope>
 			<optional>true</optional>
 		</dependency>
+		<dependency>
+			<groupId>io.projectreactor</groupId>
+			<artifactId>reactor-core</artifactId>
+		</dependency>
 		
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -78,9 +82,13 @@
 						<xjbSource>src/main/resources/global.xjb</xjbSource>
 					</xjbSources>
 					<sources>
+						<source>src/main/resources/xsd/flk.xsd</source>
 						<source>src/main/resources/xsd/medrabfile.xsd</source>
 						<source>src/main/resources/xsd/personfile.xsd</source>
 						<source>src/main/resources/xsd/svedmedpom_h.xsd</source>
+						<source>src/main/resources/xsd/svedmedpom_c.xsd</source>
+						<source>src/main/resources/xsd/svedmedpom_d.xsd</source>
+						<source>src/main/resources/xsd/svedmedpom_t.xsd</source> 
 					</sources>
 					<outputDirectory>${basedir}/src/main/java</outputDirectory>
 					<clearOutputDir>false</clearOutputDir>

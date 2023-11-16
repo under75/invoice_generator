@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+   <xsd:complexType name="schet">
+      <xsd:sequence>
+         <xsd:element name="CODE" type="xsd:int"/>
+         <xsd:element name="CODE_MO" type="xsd:string"/>
+         <xsd:element name="YEAR" type="xsd:short"/>
+         <xsd:element name="MONTH" type="xsd:short"/>
+         <xsd:element name="NSCHET" type="xsd:string"/>
+         <xsd:element name="DSCHET" type="xsd:date"/>
+         <xsd:element name="PLAT" type="xsd:string" minOccurs="0"/>
+         <xsd:element name="SUMMAV" type="xsd:decimal" minOccurs="0"/>
+         <xsd:element name="COMENTS" type="xsd:string"/>
+         <xsd:element name="SUMMAP" type="xsd:decimal" minOccurs="0"/>
+         <xsd:element name="SANK_MEK" type="xsd:decimal" minOccurs="0"/>
+         <xsd:element name="SANK_MEE" type="xsd:decimal" minOccurs="0"/>
+         <xsd:element name="SANK_EKMP" type="xsd:decimal" minOccurs="0"/>
+         <xsd:element name="DISP" type="xsd:string" minOccurs="0"/>
+      </xsd:sequence>
+   </xsd:complexType>
+   <xsd:complexType name="schetZap">
+      <xsd:sequence>
+         <xsd:element name="N_ZAP" type="xsd:int"/>
+         <xsd:element name="PR_NOV" type="xsd:short"/>
+         <xsd:element name="PACIENT" type="pacient"/>
+         <xsd:element name="Z_SL" minOccurs="1">
+            <xsd:complexType>
+               <xsd:sequence>
+                  <xsd:element name="IDCASE" type="xsd:long"/>
+                  <xsd:element name="VIDPOM" type="xsd:short"/>
+                  <xsd:element name="LPU" type="xsd:string"/>
+                  <xsd:element name="VBR" type="xsd:short"/>
+                  <xsd:element name="DATE_Z_1" type="xsd:date"/>
+                  <xsd:element name="DATE_Z_2" type="xsd:date"/>
+                  <xsd:element name="P_OTK" type="xsd:short"/>
+                  <xsd:element name="RSLT_D" type="xsd:short"/>
+                  <xsd:element name="OS_SLUCH" type="xsd:int" minOccurs="0" maxOccurs="unbounded"/>
+                  <xsd:element name="SL" type="sluch" maxOccurs="unbounded"/>
+                  <xsd:element name="IDSP" type="xsd:short" minOccurs="0"/>
+                  <xsd:element name="SUMV" type="xsd:decimal" minOccurs="0"/>
+                  <xsd:element name="OPLATA" type="xsd:short" minOccurs="0"/>
+                  <xsd:element name="SUMP" type="xsd:decimal" minOccurs="0"/>
+                  <xsd:element name="SANK_IT" type="xsd:decimal" minOccurs="0"/>
+               </xsd:sequence>
+            </xsd:complexType>
+         </xsd:element>
+      </xsd:sequence>
+   </xsd:complexType>
+   <xsd:complexType name="pacient">
+      <xsd:sequence>
+         <xsd:element name="ID_PAC" type="xsd:string"/>
+         <xsd:element name="VPOLIS" type="xsd:short"/>
+         <xsd:element name="SPOLIS" type="xsd:string" minOccurs="0"/>
+         <xsd:element name="NPOLIS" type="xsd:string"/>
+         <xsd:element name="ST_OKATO" type="xsd:string" minOccurs="0"/>
+         <xsd:element name="SMO" type="xsd:string" minOccurs="0"/>
+         <xsd:element name="SMO_OGRN" type="xsd:string" minOccurs="0"/>
+         <xsd:element name="SMO_OK" type="xsd:string" minOccurs="0"/>
+         <xsd:element name="SMO_NAM" type="xsd:string" minOccurs="0"/>
+         <xsd:element name="NOVOR" type="xsd:string"/>
+      </xsd:sequence>
+   </xsd:complexType>
+   <xsd:complexType name="sluch">
+      <xsd:sequence>
+         <xsd:element name="SL_ID" type="xsd:string"/>
+         <xsd:element name="LPU_1" type="xsd:string" minOccurs="0"/>
+         <xsd:element name="PODR" type="xsd:long" minOccurs="0"/>
+         <xsd:element name="NHISTORY" type="xsd:string"/>
+         <xsd:element name="DATE_1" type="xsd:date"/>
+         <xsd:element name="DATE_2" type="xsd:date"/>
+         <xsd:element name="DS1" type="xsd:string"/>
+         <xsd:element name="DS1_PR" type="xsd:short" minOccurs="0"/>
+         <xsd:element name="DS_ONK" type="xsd:short"/>
+         <xsd:element name="PR_D_N" type="xsd:short"/>
+         <xsd:element name="DS2_N" type="DS2_N" minOccurs="0" maxOccurs="unbounded"/>
+         <xsd:element name="NAZ" type="NAZ" minOccurs="0" maxOccurs="unbounded"/>
+         <xsd:element name="ED_COL" type="xsd:decimal" minOccurs="0"/>
+         <xsd:element name="TARIF" type="xsd:decimal" minOccurs="0"/>
+         <xsd:element name="SUM_M" type="xsd:decimal" minOccurs="0"/>
+         <xsd:element name="USL" type="uslug" maxOccurs="unbounded"/>
+         <xsd:element name="COMENTSL" type="xsd:string" minOccurs="0"/>
+      </xsd:sequence>
+   </xsd:complexType>
+   <xsd:complexType name="uslug">
+      <xsd:sequence>
+         <xsd:element name="IDSERV" type="xsd:string"/>
+         <xsd:element name="N_s" type="xsd:int" minOccurs="0"/>
+         <xsd:element name="LPU" type="xsd:string"/>
+         <xsd:element name="LPU_1" type="xsd:string" minOccurs="0"/>
+         <xsd:element name="PODR" type="xsd:long" minOccurs="0"/>
+         <xsd:element name="DATE_IN" type="xsd:date"/>
+         <xsd:element name="DATE_OUT" type="xsd:date"/>
+         <xsd:element name="P_OTK" type="xsd:short"/>
+         <xsd:element name="CODE_USL" type="xsd:string"/>
+         <xsd:element name="KOL_USL" type="xsd:decimal"/>
+         <xsd:element name="TARIF" type="xsd:decimal" minOccurs="0"/>
+         <xsd:element name="SUMV_USL" type="xsd:decimal" minOccurs="0"/>
+         <xsd:element name="MR_USL_N" type="MR_USL_N" minOccurs="0" maxOccurs="unbounded"/>
+         <xsd:element name="PRVS" type="xsd:int"/>
+         <xsd:element name="CODE_MD" type="xsd:string"/>
+         <xsd:element name="COMENTU" type="xsd:string" minOccurs="0"/>
+      </xsd:sequence>
+   </xsd:complexType>
+   <xsd:complexType name="svedMedpom">
+      <xsd:sequence>
+         <xsd:element name="ZGLV" type="zglv"/>
+         <xsd:element name="SCHET" type="schet"/>
+         <xsd:element name="ZAP" type="schetZap" maxOccurs="unbounded"/>
+      </xsd:sequence>
+   </xsd:complexType>
+   <xsd:complexType name="DS2_N">
+      <xsd:sequence>
+         <xsd:element name="DS2" type="xsd:string"/>
+         <xsd:element name="DS2_PR" type="xsd:short" minOccurs="0"/>
+         <xsd:element name="PR_DS2_N" type="xsd:short" minOccurs="0"/>
+      </xsd:sequence>
+   </xsd:complexType>
+   <xsd:complexType name="NAZ">
+      <xsd:sequence>
+         <xsd:element name="NAZ_N" type="xsd:short"/>
+         <xsd:element name="NAZ_R" type="xsd:short"/>
+         <xsd:element name="NAZ_SP" type="xsd:short" minOccurs="0"/>
+         <xsd:element name="NAZ_V" type="xsd:short" minOccurs="0"/>
+         <xsd:element name="NAZ_USL" type="xsd:string" minOccurs="0"/>
+         <xsd:element name="NAPR_DATE" type="xsd:date" minOccurs="0"/>
+         <xsd:element name="NAPR_MO" type="xsd:string" minOccurs="0"/>
+         <xsd:element name="NAZ_PMP" type="xsd:short" minOccurs="0"/>
+         <xsd:element name="NAZ_PK" type="xsd:short" minOccurs="0"/>
+         <xsd:element name="PR_D_N0" type="xsd:short"/>
+      </xsd:sequence>
+   </xsd:complexType>
+   <xsd:complexType name="MR_USL_N">
+      <xsd:sequence>
+         <xsd:element name="MR_N" type="xsd:int"/>
+         <xsd:element name="PRVS" type="xsd:int"/>
+         <xsd:element name="CODE_MD" type="xsd:string"/>
+      </xsd:sequence>
+   </xsd:complexType>
+   <xsd:complexType name="zglv">
+      <xsd:sequence>
+         <xsd:element name="VERSION" type="xsd:string"/>
+         <xsd:element name="DATA" type="xsd:date"/>
+         <xsd:element name="FILENAME" type="xsd:string"/>
+         <xsd:element name="SD_Z" type="xsd:int"/>
+      </xsd:sequence>
+   </xsd:complexType>
+   <xsd:element name="ZL_LIST" type="svedMedpom"/>
+</xsd:schema>
