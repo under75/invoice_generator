@@ -9,7 +9,7 @@
 	</parent>
 	<groupId>ru.sartfoms</groupId>
 	<artifactId>invoice-generator</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.2-SNAPSHOT</version>
 	<name>invoicegenerator</name>
 	<description>Централизованное формирования счетов по медуслугам</description>
 	<properties>
@@ -85,15 +85,39 @@
 						<source>src/main/resources/xsd/flk.xsd</source>
 						<source>src/main/resources/xsd/medrabfile.xsd</source>
 						<source>src/main/resources/xsd/personfile.xsd</source>
-						<source>src/main/resources/xsd/svedmedpom_h.xsd</source>
-						<source>src/main/resources/xsd/svedmedpom_c.xsd</source>
-						<source>src/main/resources/xsd/svedmedpom_d.xsd</source>
-						<source>src/main/resources/xsd/svedmedpom_t.xsd</source> 
+						<source>src/main/resources/xsd/svedmedpom.xsd</source>
 					</sources>
 					<outputDirectory>${basedir}/src/main/java</outputDirectory>
 					<clearOutputDir>false</clearOutputDir>
 				</configuration>
-			</plugin>
+			</plugin><!--
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>jaxb2-maven-plugin</artifactId>
+				<version>3.1.0</version>
+				<executions>
+					<execution>
+						<id>schemagen</id>
+						<goals>
+							<goal>schemagen</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<sources>
+						<source>src/main/java/generated/SvedMedpom.java</source>
+					</sources>
+					<outputDirectory>src/main/resources/xsd</outputDirectory>
+					<clearOutputDir>false</clearOutputDir>
+					<transformSchemas>
+						<transformSchema>
+							<uri>/jaxb/gen</uri>
+							<toPrefix>user</toPrefix>
+							<toFile>svedmedpom.xsd</toFile>
+						</transformSchema>
+					</transformSchemas>
+				</configuration>
+			</plugin>-->
 		</plugins>
 	</build>
 
