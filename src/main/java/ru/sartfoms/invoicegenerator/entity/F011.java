@@ -11,6 +11,8 @@ public class F011 {
 	private Integer iddoc;
 	private Integer docser;
 	private Integer docnum;
+	private String reser;
+	private String renum;
 
 	public Integer getIddoc() {
 		return iddoc;
@@ -34,6 +36,22 @@ public class F011 {
 
 	public void setDocnum(Integer docnum) {
 		this.docnum = docnum;
+	}
+
+	public String getReser() {
+		return reser;
+	}
+
+	public void setReser(String reser) {
+		this.reser = reser;
+	}
+
+	public String getRenum() {
+		return renum;
+	}
+
+	public void setRenum(String renum) {
+		this.renum = renum;
 	}
 
 }

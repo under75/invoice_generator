@@ -13,6 +13,10 @@ public class F011Service {
 		this.f011Repository = f011Repository;
 	}
 
+	public boolean existsById(Integer iddoc) {
+		return f011Repository.existsById(iddoc);
+	}
+
 	public F011 findOne(Integer iddoc) {
 		return f011Repository.getReferenceById(iddoc);
 	}

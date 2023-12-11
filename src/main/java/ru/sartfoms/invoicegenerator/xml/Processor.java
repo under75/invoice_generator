@@ -18,7 +18,6 @@ import javax.xml.namespace.QName;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.persistence.jaxb.JAXBContextFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import generated.Flk;
@@ -32,6 +31,7 @@ import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Marshaller;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
 import ru.sartfoms.invoicegenerator.exception.ProcessException;
 import ru.sartfoms.invoicegenerator.validator.Q015ValidatorC;
 import ru.sartfoms.invoicegenerator.validator.Q015ValidatorH;
@@ -61,8 +61,8 @@ public class Processor {
 		this.q15ValidatorT = q15ValidatorT;
 	}
 
-	@Scheduled(cron = "0 0/1 8-23 * * *")
-	private void run() throws IOException, ProcessException {
+//	@Scheduled(cron = "0 0/1 8-23 * * *")
+	public void run() throws IOException, ProcessException {
 		FileUtils.copyDirectory(new File(outsideDir), new File(insideDir + TMP));
 		FileUtils.cleanDirectory(new File(outsideDir));
 
@@ -70,48 +70,57 @@ public class Processor {
 			Flux.fromStream(stream.map(t -> t.toFile())).subscribe(f -> {
 				try {
 					process(f);
-					FileUtils.copyToDirectory(f, new File(insideDir + "/" + getActualFolder()));
+//					FileUtils.copyToDirectory(f, new File(insideDir + "/" + getActualFolder()));
 //					FileUtils.delete(f);
 				} catch (IOException | JAXBException e) {
 					throw new ProcessException(e);
 				}
 			});
 		}
+		System.out.println("---- DONE ----");
 	}
 
 	private String getActualFolder() {
 		return LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
 	}
 
+	/**
+	 * Не проходят Q015ValidatorC{001F.00.0230}, Q015ValidatorL{003F.00.1710, 003F.00.1730, 003F.00.1740, 004F.00.1570}
+	 **/
 	private void process(File zip) throws IOException, JAXBException {
 		try (ZipFile zipfile = new ZipFile(zip);) {
 			Enumeration<? extends ZipEntry> entries = zipfile.entries();
-			Mono<PersonFile> personFileMono = null;
-			Mono<MedrabFile> medrabFileMono = null;
-			Mono<SvedMedpom> svedMedpomMono = null;
+			Mono<Tuple2<PersonFile, String>> personFileMono = null;
+			Mono<Tuple2<MedrabFile, String>> medrabFileMono = null;
+			Mono<Tuple2<SvedMedpom, String>> svedMedpomMono = null;
 			while (entries.hasMoreElements()) {
 				ZipEntry entry = entries.nextElement();
 				String key = entry.getName().substring(0, 1).toLowerCase();
 				if (key.equals("l")) {
 					PersonFile personFile = (PersonFile) unmarshal(zipfile.getInputStream(entry)).getValue();
-					personFileMono = Mono.just(personFile);
+					personFileMono = Mono.zip(Mono.just(personFile), Mono.just(entry.getName()));
 				} else if (key.equals("v")) {
 					MedrabFile medrabFile = (MedrabFile) unmarshal(zipfile.getInputStream(entry)).getValue();
-					medrabFileMono = Mono.just(medrabFile);
+					medrabFileMono = Mono.zip(Mono.just(medrabFile), Mono.just(entry.getName()));
 				} else if (key.equals("h") || key.equals("d") || key.equals("t") || key.equals("c")) {
 					SvedMedpom svedMedpom = (SvedMedpom) unmarshal(zipfile.getInputStream(entry)).getValue();
-					svedMedpomMono = Mono.just(svedMedpom);
+					svedMedpomMono = Mono.zip(Mono.just(svedMedpom), Mono.just(entry.getName()));
 				}
 			}
 			Flk flk = createFlk(zipfile);
 			Mono.zip(personFileMono, medrabFileMono, svedMedpomMono, Mono.just(flk)).subscribe(m -> {
-				q15ValidatorL.validate(m);
-				q15ValidatorH.validate(m);
-				q15ValidatorC.validate(m);
-				q15ValidatorT.validate(m);
-				q15ValidatorX.validate(m);
+//				q15ValidatorL.validate(m);
+//				q15ValidatorH.validate(m);
+//				q15ValidatorT.validate(m);
+//				q15ValidatorX.validate(m);
+				String key = m.getT3().getT2().substring(0, 1).toLowerCase();
+				if (key.equals("c")) {
+					q15ValidatorC.validate(m);
+				} 
 			});
-			marshal(flk);
+			if (flk.getPR().size() > 0) {
+				marshal(flk);
+			}
 		}
 	}
 

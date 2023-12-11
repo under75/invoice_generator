@@ -6,6 +6,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
+import ru.sartfoms.invoicegenerator.xml.Processor;
+
 @SpringBootApplication
 @EnableScheduling
 public class InvoicegeneratorApplication {
@@ -14,9 +16,9 @@ public class InvoicegeneratorApplication {
 	}
 	
 	@Bean
-	public CommandLineRunner CommandLineRunnerBean() {
+	public CommandLineRunner CommandLineRunnerBean(Processor processor) {
 		return (args) -> {
-			
+			processor.run();
 		};
 	}
 
