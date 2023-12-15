@@ -2,15 +2,11 @@ package ru.sartfoms.invoicegenerator.validator;
 
 import org.springframework.stereotype.Component;
 
-import generated.Flk;
-import generated.MedrabFile;
-import generated.PersonFile;
-import generated.SvedMedpom;
-import reactor.util.function.Tuple4;
+import ru.sartfoms.invoicegenerator.model.Cortege;
 
 @Component
 public class Q015ValidatorX {
-	public void validate(Tuple4<PersonFile, MedrabFile, SvedMedpom, Flk> tuple4) {
+	public void validate(Cortege cortege) {
 
 	}
 }

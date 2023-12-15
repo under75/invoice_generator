@@ -7,17 +7,14 @@ import javax.xml.datatype.DatatypeConstants;
 
 import org.springframework.stereotype.Component;
 
-import generated.Flk;
 import generated.FlkPr;
-import generated.MedrabFile;
 import generated.Pacient;
 import generated.Person;
 import generated.PersonFile;
 import generated.SchetZap;
 import generated.SvedMedpom;
-import reactor.util.function.Tuple2;
-import reactor.util.function.Tuple4;
 import ru.sartfoms.invoicegenerator.entity.F011;
+import ru.sartfoms.invoicegenerator.model.Cortege;
 import ru.sartfoms.invoicegenerator.service.F011Service;
 
 @Component
@@ -28,18 +25,17 @@ public class Q015ValidatorL {
 		this.f011Service = f011Service;
 	}
 
-	public void validate(
-			Tuple4<Tuple2<PersonFile, String>, Tuple2<MedrabFile, String>, Tuple2<SvedMedpom, String>, Flk> m) {
+	public void validate(Cortege cortege) {
 
-		Collection<FlkPr> prs = m.getT4().getPR();
-		PersonFile personFile = m.getT1().getT1();
-		
-		m.getT1().getT1().getPERS().forEach(p -> {
-			
-			SchetZap schetZap = m.getT3().getT1().getZAP().stream()
+		Collection<FlkPr> prs = cortege.getFlk().getPR();
+		PersonFile personFile = cortege.getPersonFile();
+
+		personFile.getPERS().parallelStream().peek(p -> {
+
+			SchetZap schetZap = cortege.getSvedMedpom().getZAP().stream()
 					.filter(z -> z.getPACIENT().getIDPAC().equals(p.getIDPAC())).findAny().get();
 			Pacient pacient = schetZap.getPACIENT();
-			
+
 			// 001F.00.0700
 			_001F_00_0700(p, prs);
 
@@ -116,7 +112,7 @@ public class Q015ValidatorL {
 			_003F_00_1700(p, prs, pacient);
 
 			// 003F.00.1710
-			_003F_00_1710(p, prs, m.getT3().getT2());
+			_003F_00_1710(p, prs, cortege.getSvedMedpomFileName());
 
 			// 003F.00.1720
 			_003F_00_1720(p, prs, pacient);
@@ -126,9 +122,9 @@ public class Q015ValidatorL {
 
 			// 003F.00.1740
 			_003F_00_1740(p, prs, pacient);
-			
+
 			// 003F.00.1970
-			_003F_00_1970(m.getT1(), prs, pacient);
+			_003F_00_1970(personFile, cortege.getPersonFileName(), prs, pacient);
 
 			// 003F.00.3080
 			_003F_00_3080(p, prs);
@@ -196,32 +192,32 @@ public class Q015ValidatorL {
 			// 004F.00.1750
 			_004F_00_1750(p, prs);
 
-			//006F.00.0040
-			
-			//006F.00.0060
-			
-			//006F.00.0670
+			// 006F.00.0040
+
+			// 006F.00.0060
+
+			// 006F.00.0670
 			_006F_00_0670(personFile, prs, p);
-			
-			//006F.00.0680
+
+			// 006F.00.0680
 			_006F_00_0680(schetZap, prs, p);
-			
-			//006F.00.0690
+
+			// 006F.00.0690
 			_006F_00_0690(prs, p);
-		});
-		
+		}).count();
+
 		// 003F.00.1990
-		_003F_00_1990(personFile, prs, m.getT3().getT1());
+		_003F_00_1990(personFile, prs, cortege.getSvedMedpom());
 
 		// 003F.00.3060
 		_003F_00_3060(personFile, prs);
 
 		// 003F.00.3070
 		_003F_00_3070(personFile, prs);
-		
+
 		// 004F.00.0030
 		_004F_00_0030(personFile, prs);
-		
+
 		// 004F.00.1760
 		_004F_00_1760(personFile, prs);
 
@@ -233,12 +229,12 @@ public class Q015ValidatorL {
 
 		// 006F.00.0020
 		_006F_00_0020(personFile, prs);
-		
-		//006F.00.0080
-		_006F_00_0080(personFile, prs, m.getT3().getT1().getSCHET().getYEAR());
-		
-		//006F.00.0100
-		_006F_00_0100(personFile, prs, m.getT3().getT1().getSCHET().getMONTH());
+
+		// 006F.00.0080
+		_006F_00_0080(personFile, prs, cortege.getSvedMedpom().getSCHET().getYEAR());
+
+		// 006F.00.0100
+		_006F_00_0100(personFile, prs, cortege.getSvedMedpom().getSCHET().getMONTH());
 
 	}
 
@@ -377,7 +373,8 @@ public class Q015ValidatorL {
 	}
 
 	private void _003F_00_1550(Person p, Collection<FlkPr> prs, Pacient pacient) {
-		if (!pacient.getNOVOR().equals("0") && !p.getDOST().contains((short) 2) && (p.getFAMP() == null || p.getFAMP().isEmpty())) {
+		if (!pacient.getNOVOR().equals("0") && !p.getDOST().contains((short) 2)
+				&& (p.getFAMP() == null || p.getFAMP().isEmpty())) {
 			FlkPr flkPr = new FlkPr();
 			flkPr.setBASEL("PERS");
 			flkPr.setCOMMENT("003F.00.1550");
@@ -430,16 +427,17 @@ public class Q015ValidatorL {
 
 	private void _003F_00_1590(Person p, Collection<FlkPr> prs, Pacient pacient) {
 		try {
-		if (!pacient.getNOVOR().equals("0") && !p.getDOSTP().contains((short) 3) && (p.getIMP() == null || p.getIMP().isEmpty())) {
-			FlkPr flkPr = new FlkPr();
-			flkPr.setBASEL("PERS");
-			flkPr.setCOMMENT("003F.00.1590");
-			flkPr.setIMPOL("IM_P");
-			flkPr.setNZAP(p.getIDPAC());
-			flkPr.setOSHIB((short) 902);
-			flkPr.setZNPOL(p.getIMP());
-			prs.add(flkPr);
-		}
+			if (!pacient.getNOVOR().equals("0") && !p.getDOSTP().contains((short) 3)
+					&& (p.getIMP() == null || p.getIMP().isEmpty())) {
+				FlkPr flkPr = new FlkPr();
+				flkPr.setBASEL("PERS");
+				flkPr.setCOMMENT("003F.00.1590");
+				flkPr.setIMPOL("IM_P");
+				flkPr.setNZAP(p.getIDPAC());
+				flkPr.setOSHIB((short) 902);
+				flkPr.setZNPOL(p.getIMP());
+				prs.add(flkPr);
+			}
 		} catch (Exception e) {
 			System.out.println();
 		}
@@ -485,7 +483,8 @@ public class Q015ValidatorL {
 	}
 
 	private void _003F_00_1630(Person p, Collection<FlkPr> prs, Pacient pacient) {
-		if (pacient.getNOVOR().equals("0") && (p.getIM() == null || p.getIM().isEmpty()) && !p.getDOST().contains((short) 3)) {
+		if (pacient.getNOVOR().equals("0") && (p.getIM() == null || p.getIM().isEmpty())
+				&& !p.getDOST().contains((short) 3)) {
 			FlkPr flkPr = new FlkPr();
 			flkPr.setBASEL("PERS");
 			flkPr.setCOMMENT("003F.00.1630");
@@ -497,7 +496,8 @@ public class Q015ValidatorL {
 	}
 
 	private void _003F_00_1640(Person p, Collection<FlkPr> prs, Pacient pacient) {
-		if (pacient.getNOVOR().equals("0") && (p.getFAM() == null || p.getFAM().isEmpty()) && !p.getDOST().contains((short) 2)) {
+		if (pacient.getNOVOR().equals("0") && (p.getFAM() == null || p.getFAM().isEmpty())
+				&& !p.getDOST().contains((short) 2)) {
 			FlkPr flkPr = new FlkPr();
 			flkPr.setBASEL("PERS");
 			flkPr.setCOMMENT("003F.00.1640");
@@ -509,7 +509,8 @@ public class Q015ValidatorL {
 	}
 
 	private void _003F_00_1650(Person p, Collection<FlkPr> prs, Pacient pacient) {
-		if (!pacient.getNOVOR().equals("0") && (p.getIMP() == null || p.getIMP().isEmpty()) && !p.getDOSTP().contains((short) 3)) {
+		if (!pacient.getNOVOR().equals("0") && (p.getIMP() == null || p.getIMP().isEmpty())
+				&& !p.getDOSTP().contains((short) 3)) {
 			FlkPr flkPr = new FlkPr();
 			flkPr.setBASEL("PERS");
 			flkPr.setCOMMENT("003F.00.1650");
@@ -521,7 +522,8 @@ public class Q015ValidatorL {
 	}
 
 	private void _003F_00_1660(Person p, Collection<FlkPr> prs, Pacient pacient) {
-		if (!pacient.getNOVOR().equals("0") && (p.getFAMP() == null || p.getFAMP().isEmpty()) && !p.getDOSTP().contains((short) 2)) {
+		if (!pacient.getNOVOR().equals("0") && (p.getFAMP() == null || p.getFAMP().isEmpty())
+				&& !p.getDOSTP().contains((short) 2)) {
 			FlkPr flkPr = new FlkPr();
 			flkPr.setBASEL("PERS");
 			flkPr.setCOMMENT("003F.00.1660");
@@ -636,14 +638,14 @@ public class Q015ValidatorL {
 		}
 	}
 
-	private void _003F_00_1970(Tuple2<PersonFile, String> tuple2, Collection<FlkPr> prs, Pacient pacient) {
-		if (!tuple2.getT2().replaceFirst(".xml", "").equals(tuple2.getT1().getZGLV().getFILENAME())) {
+	private void _003F_00_1970(PersonFile personFile, String personFileName, Collection<FlkPr> prs, Pacient pacient) {
+		if (!personFileName.replaceFirst(".xml", "").equals(personFile.getZGLV().getFILENAME())) {
 			FlkPr flkPr = new FlkPr();
 			flkPr.setBASEL("ZGLV");
 			flkPr.setCOMMENT("003F.00.1970");
 			flkPr.setIMPOL("FILENAME");
 			flkPr.setOSHIB((short) 904);
-			flkPr.setZNPOL(tuple2.getT1().getZGLV().getFILENAME());
+			flkPr.setZNPOL(personFile.getZGLV().getFILENAME());
 			prs.add(flkPr);
 		}
 	}
@@ -784,7 +786,7 @@ public class Q015ValidatorL {
 	}
 
 	private void _004F_00_1610(Person p, Collection<FlkPr> prs) {
-		if (!DateValidator.isValid(p.getDR().toString())) {
+		if (!p.getDR().isValid()) {
 			FlkPr flkPr = new FlkPr();
 			flkPr.setBASEL("PERS");
 			flkPr.setCOMMENT("004F.00.1610");
@@ -861,7 +863,7 @@ public class Q015ValidatorL {
 	}
 
 	private void _004F_00_1670(Person p, Collection<FlkPr> prs) {
-		if (p.getDRP() != null && !DateValidator.isValid(p.getDRP().toString())) {
+		if (p.getDRP() != null && !p.getDRP().isValid()) {
 			FlkPr flkPr = new FlkPr();
 			flkPr.setBASEL("PERS");
 			flkPr.setCOMMENT("004F.00.1670");
@@ -1029,7 +1031,7 @@ public class Q015ValidatorL {
 			prs.add(flkPr);
 		}
 	}
-	
+
 	private void _006F_00_0080(PersonFile personFile, Collection<FlkPr> prs, Short year) {
 		String filename = personFile.getZGLV().getFILENAME();
 		String yy = filename.replaceFirst("^\\w+_(\\d{2})\\w+$", "$1");
@@ -1043,7 +1045,7 @@ public class Q015ValidatorL {
 			prs.add(flkPr);
 		}
 	}
-	
+
 	private void _006F_00_0100(PersonFile personFile, Collection<FlkPr> prs, Short month) {
 		String filename = personFile.getZGLV().getFILENAME();
 		String mm = filename.replaceFirst("^\\w+_\\d{2}(\\d{2})\\w+$", "$1");
@@ -1069,7 +1071,7 @@ public class Q015ValidatorL {
 			prs.add(flkPr);
 		}
 	}
-	
+
 	private void _006F_00_0680(SchetZap schetZap, Collection<FlkPr> prs, Person p) {
 		if (p.getDR().compare(schetZap.getZSL().getDATEZ1()) == DatatypeConstants.GREATER) {
 			FlkPr flkPr = new FlkPr();
@@ -1081,9 +1083,10 @@ public class Q015ValidatorL {
 			prs.add(flkPr);
 		}
 	}
-	
+
 	private void _006F_00_0690(Collection<FlkPr> prs, Person p) {
-		if (p.getDRP() == null) return;
+		if (p.getDRP() == null)
+			return;
 		LocalDate drP = p.getDRP().toGregorianCalendar().toZonedDateTime().toLocalDate();
 		LocalDate dr = p.getDR().toGregorianCalendar().toZonedDateTime().toLocalDate();
 		if (dr.minusYears(14).isBefore(drP)) {

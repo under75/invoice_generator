@@ -3,13 +3,10 @@ package ru.sartfoms.invoicegenerator.xml;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.Enumeration;
-import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -29,10 +26,8 @@ import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBElement;
 import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Marshaller;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-import reactor.util.function.Tuple2;
 import ru.sartfoms.invoicegenerator.exception.ProcessException;
+import ru.sartfoms.invoicegenerator.model.Cortege;
 import ru.sartfoms.invoicegenerator.validator.Q015ValidatorC;
 import ru.sartfoms.invoicegenerator.validator.Q015ValidatorH;
 import ru.sartfoms.invoicegenerator.validator.Q015ValidatorL;
@@ -66,17 +61,16 @@ public class Processor {
 		FileUtils.copyDirectory(new File(outsideDir), new File(insideDir + TMP));
 		FileUtils.cleanDirectory(new File(outsideDir));
 
-		try (Stream<Path> stream = Files.list(Paths.get(insideDir + TMP))) {
-			Flux.fromStream(stream.map(t -> t.toFile())).subscribe(f -> {
-				try {
-					process(f);
+		Arrays.asList(new File(insideDir + TMP).listFiles()).parallelStream().peek(f -> {
+			try {
+				process(f);
 //					FileUtils.copyToDirectory(f, new File(insideDir + "/" + getActualFolder()));
 //					FileUtils.delete(f);
-				} catch (IOException | JAXBException e) {
-					throw new ProcessException(e);
-				}
-			});
-		}
+			} catch (IOException | JAXBException e) {
+				throw new ProcessException(e);
+			}
+		}).count();
+
 		System.out.println("---- DONE ----");
 	}
 
@@ -85,39 +79,45 @@ public class Processor {
 	}
 
 	/**
-	 * Не проходят Q015ValidatorC{001F.00.0230}, Q015ValidatorL{003F.00.1710, 003F.00.1730, 003F.00.1740, 004F.00.1570}
+	 * Не проходят Q015ValidatorC{001F.00.0230}, Q015ValidatorL{003F.00.1710,
+	 * 003F.00.1730, 003F.00.1740, 004F.00.1570}
 	 **/
 	private void process(File zip) throws IOException, JAXBException {
 		try (ZipFile zipfile = new ZipFile(zip);) {
 			Enumeration<? extends ZipEntry> entries = zipfile.entries();
-			Mono<Tuple2<PersonFile, String>> personFileMono = null;
-			Mono<Tuple2<MedrabFile, String>> medrabFileMono = null;
-			Mono<Tuple2<SvedMedpom, String>> svedMedpomMono = null;
+			Cortege cortege = new Cortege();
 			while (entries.hasMoreElements()) {
 				ZipEntry entry = entries.nextElement();
 				String key = entry.getName().substring(0, 1).toLowerCase();
 				if (key.equals("l")) {
-					PersonFile personFile = (PersonFile) unmarshal(zipfile.getInputStream(entry)).getValue();
-					personFileMono = Mono.zip(Mono.just(personFile), Mono.just(entry.getName()));
+					cortege.setPersonFile((PersonFile) unmarshal(zipfile.getInputStream(entry)).getValue());
+					cortege.setPersonFileName(entry.getName());
 				} else if (key.equals("v")) {
-					MedrabFile medrabFile = (MedrabFile) unmarshal(zipfile.getInputStream(entry)).getValue();
-					medrabFileMono = Mono.zip(Mono.just(medrabFile), Mono.just(entry.getName()));
+					cortege.setMedrabFile((MedrabFile) unmarshal(zipfile.getInputStream(entry)).getValue());
+					cortege.setMedrabFileName(entry.getName());
 				} else if (key.equals("h") || key.equals("d") || key.equals("t") || key.equals("c")) {
-					SvedMedpom svedMedpom = (SvedMedpom) unmarshal(zipfile.getInputStream(entry)).getValue();
-					svedMedpomMono = Mono.zip(Mono.just(svedMedpom), Mono.just(entry.getName()));
+					cortege.setSvedMedpom((SvedMedpom) unmarshal(zipfile.getInputStream(entry)).getValue());
+					cortege.setSvedMedpomFileName(entry.getName());
 				}
 			}
 			Flk flk = createFlk(zipfile);
-			Mono.zip(personFileMono, medrabFileMono, svedMedpomMono, Mono.just(flk)).subscribe(m -> {
-//				q15ValidatorL.validate(m);
-//				q15ValidatorH.validate(m);
-//				q15ValidatorT.validate(m);
-//				q15ValidatorX.validate(m);
-				String key = m.getT3().getT2().substring(0, 1).toLowerCase();
-				if (key.equals("c")) {
-					q15ValidatorC.validate(m);
-				} 
-			});
+			cortege.setFlk(flk);
+//			q15ValidatorL.validate(cortege);
+			String key = cortege.getSvedMedpomFileName().substring(0, 1).toLowerCase();
+			switch (key) {
+			case "c":
+				q15ValidatorC.validate(cortege);
+				break;
+			case "t":
+				q15ValidatorT.validate(cortege);
+				break;
+			case "h":
+				q15ValidatorH.validate(cortege);
+				break;
+			default:
+				break;
+			}
+
 			if (flk.getPR().size() > 0) {
 				marshal(flk);
 			}
