@@ -12,7 +12,7 @@ public class N019Service {
 		this.n019Repository = n019Repository;
 	}
 
-	public boolean existsById(Integer prcons) {
-		return n019Repository.existsById(prcons);
+	public boolean isValid(Integer prcons) {
+		return !n019Repository.findById1AndExpDateIsNull(prcons).isEmpty();
 	}
 }

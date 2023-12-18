@@ -3,7 +3,9 @@ package ru.sartfoms.invoicegenerator.xml;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -61,6 +63,8 @@ public class Processor {
 		FileUtils.copyDirectory(new File(outsideDir), new File(insideDir + TMP));
 		FileUtils.cleanDirectory(new File(outsideDir));
 
+		LocalDateTime start = LocalDateTime.now();
+		
 		Arrays.asList(new File(insideDir + TMP).listFiles()).parallelStream().peek(f -> {
 			try {
 				process(f);
@@ -70,7 +74,8 @@ public class Processor {
 				throw new ProcessException(e);
 			}
 		}).count();
-
+		
+		System.out.println("Duration: " + Duration.between(start, LocalDateTime.now()).getSeconds());
 		System.out.println("---- DONE ----");
 	}
 

@@ -9,26 +9,25 @@ import javax.persistence.IdClass;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "V014", schema = "LPUOWNER")
+@Table(name = "N001", schema = "LPUOWNER")
 @IdClass(CompositeKey2.class)
-public class V014 {
+public class N001 {
 	@Id
-	@Column(name="idfrmmp")
+	@Column(name = "id_prot")
 	private Integer id1;
-
 	@Id
-	@Column(name="datebeg")
+	@Column(name = "datebeg")
 	private LocalDate effDate;
-	
-	@Column(name="dateend")
-	private LocalDate expDate;
 
-	public Integer getId1() {
-		return id1;
-	}
+	@Column(name = "dateend")
+	private LocalDate expDate;
 
 	public LocalDate getEffDate() {
 		return effDate;
+	}
+
+	public Integer getId1() {
+		return id1;
 	}
 
 	public LocalDate getExpDate() {
@@ -46,4 +45,5 @@ public class V014 {
 	public void setExpDate(LocalDate expDate) {
 		this.expDate = expDate;
 	}
+	
 }

@@ -13,6 +13,6 @@ public class V014Service {
 	}
 
 	public boolean existsById(Integer id) {
-		return v014Repository.existsById(id);
+		return !v014Repository.findAllById1AndExpDateIsNull(id).isEmpty();
 	}
 }

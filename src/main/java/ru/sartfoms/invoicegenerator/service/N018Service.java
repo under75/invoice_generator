@@ -12,7 +12,7 @@ public class N018Service {
 		this.n018Repository = n018Repository;
 	}
 
-	public boolean existsById(Integer id) {
-		return n018Repository.existsById(id);
+	public boolean isValid(Integer id) {
+		return !n018Repository.findAllById1AndExpDateIsNull(id).isEmpty();
 	}
 }

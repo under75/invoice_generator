@@ -11,9 +11,12 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.springframework.stereotype.Component;
 
+import generated.BDIAG;
+import generated.BPROT;
 import generated.CONS;
 import generated.FlkPr;
 import generated.NAPR;
+import generated.ONKUSL;
 import generated.OnkSl;
 import generated.Pacient;
 import generated.Person;
@@ -24,9 +27,16 @@ import ru.sartfoms.invoicegenerator.service.F002Service;
 import ru.sartfoms.invoicegenerator.service.F003Service;
 import ru.sartfoms.invoicegenerator.service.F010Service;
 import ru.sartfoms.invoicegenerator.service.F032Service;
+import ru.sartfoms.invoicegenerator.service.N001Service;
 import ru.sartfoms.invoicegenerator.service.N002Service;
 import ru.sartfoms.invoicegenerator.service.N003Service;
 import ru.sartfoms.invoicegenerator.service.N004Service;
+import ru.sartfoms.invoicegenerator.service.N005Service;
+import ru.sartfoms.invoicegenerator.service.N007Service;
+import ru.sartfoms.invoicegenerator.service.N008Service;
+import ru.sartfoms.invoicegenerator.service.N011Service;
+import ru.sartfoms.invoicegenerator.service.N013Service;
+import ru.sartfoms.invoicegenerator.service.N014Service;
 import ru.sartfoms.invoicegenerator.service.N018Service;
 import ru.sartfoms.invoicegenerator.service.N019Service;
 import ru.sartfoms.invoicegenerator.service.V002Service;
@@ -65,12 +75,21 @@ public class Q015ValidatorC {
 	private final N002Service n002Service;
 	private final N003Service n003Service;
 	private final N004Service n004Service;
+	private final N005Service n005Service;
+	private final N007Service n007Service;
+	private final N011Service n011Service;
+	private final N008Service n008Service;
+	private final N001Service n001Service;
+	private final N013Service n013Service;
+	private final N014Service n014Service;
 
 	public Q015ValidatorC(F003Service f003Service, F032Service f032Service, F002Service f002Service,
 			F010Service f010Service, V008Service v008Service, V014Service v014Service, V009Service v009Service,
 			V012Service v012Service, V010Service v010Service, V002Service v002Service, V020Service v020Service,
 			V025Service v025Service, V027Service v027Service, V021Service v021Service, V028Service v028Service,
-			V029Service v029Service, N019Service n019Service, N018Service n018Service, N002Service n002Service, N003Service n003Service, N004Service n004Service) {
+			V029Service v029Service, N019Service n019Service, N018Service n018Service, N002Service n002Service,
+			N003Service n003Service, N004Service n004Service, N005Service n005Service, N007Service n007Service,
+			N011Service n011Service, N008Service n008Service, N001Service n001Service, N013Service n013Service, N014Service n014Service) {
 		this.f003Service = f003Service;
 		this.f032Service = f032Service;
 		this.f002Service = f002Service;
@@ -92,10 +111,16 @@ public class Q015ValidatorC {
 		this.n002Service = n002Service;
 		this.n003Service = n003Service;
 		this.n004Service = n004Service;
+		this.n005Service = n005Service;
+		this.n007Service = n007Service;
+		this.n011Service = n011Service;
+		this.n008Service = n008Service;
+		this.n001Service = n001Service;
+		this.n013Service = n013Service;
+		this.n014Service = n014Service;
 	}
 
-	public void validate(Cortege cortege) {
-
+	public void validate(Cortege cortege) { 
 		Collection<FlkPr> prs = cortege.getFlk().getPR();
 		Schet schet = cortege.getSvedMedpom().getSCHET();
 
@@ -134,7 +159,6 @@ public class Q015ValidatorC {
 			_001F_00_0230(zap.getZSL().getIDSP(), prs);
 
 			zap.getZSL().getSL().forEach(sluch -> {
-				
 
 				// 001F.00.0270
 				_001F_00_0270(sluch, prs);
@@ -177,9 +201,39 @@ public class Q015ValidatorC {
 
 				// 001F.00.0430
 				_001F_00_0430(sluch.getONKSL(), prs, person.getDR());
-				
-				//001F.00.0440
+
+				// 001F.00.0440
 				_001F_00_0440(sluch.getONKSL(), prs, person.getDR());
+
+				// 001F.00.0450
+				_001F_00_0450(sluch.getONKSL(), prs, person.getDR());
+
+				if (sluch.getONKSL() != null) {
+					sluch.getONKSL().getBDIAG().forEach(diag -> {
+						// 001F.00.0460
+						_001F_00_0460(diag, prs);
+
+						// 001F.00.0470
+						_001F_00_0470(diag, prs);
+
+						// 001F.00.0480
+						_001F_00_0480(diag, prs);
+
+						// 001F.00.0490
+						_001F_00_0490(diag, prs);
+					});
+					sluch.getONKSL().getBPROT().forEach(prot -> {
+						// 001F.00.0500
+						_001F_00_0500(prot, prs);
+					});
+					sluch.getONKSL().getONKUSL().forEach(usl -> {
+						// 001F.00.0510
+						_001F_00_0510(usl, prs);
+
+						// 001F.00.0520
+						_001F_00_0520(usl, prs);
+					});
+				}
 
 			});
 
@@ -193,7 +247,6 @@ public class Q015ValidatorC {
 
 		// 001F.00.0040
 		_001F_00_0040(schet.getPLAT(), prs);
-
 	}
 
 	private void _001F_00_0030(String codeMo, Collection<FlkPr> prs) {
@@ -429,7 +482,7 @@ public class Q015ValidatorC {
 
 	private void _001F_00_0380(List<NAPR> napr, Collection<FlkPr> prs) {
 		napr.forEach(t -> {
-			if (!v028Service.existsById(Integer.valueOf(t.getNAPRV()))) {
+			if (!v028Service.isValid(Integer.valueOf(t.getNAPRV()))) {
 				FlkPr flkPr = new FlkPr();
 				flkPr.setBASEL("NAPR");
 				flkPr.setCOMMENT("001F.00.0380");
@@ -443,7 +496,7 @@ public class Q015ValidatorC {
 
 	private void _001F_00_0390(List<NAPR> napr, Collection<FlkPr> prs) {
 		napr.forEach(t -> {
-			if (t.getNAPRV() == 3 && !v029Service.existsById(Integer.valueOf(t.getMETISSL()))) {
+			if (t.getNAPRV() == 3 && !v029Service.isValid(Integer.valueOf(t.getMETISSL()))) {
 				FlkPr flkPr = new FlkPr();
 				flkPr.setBASEL("NAPR");
 				flkPr.setCOMMENT("001F.00.0390");
@@ -457,7 +510,7 @@ public class Q015ValidatorC {
 
 	private void _001F_00_0400(List<CONS> cons, Collection<FlkPr> prs) {
 		cons.forEach(t -> {
-			if (!n019Service.existsById(Integer.valueOf(t.getPRCONS()))) {
+			if (!n019Service.isValid(Integer.valueOf(t.getPRCONS()))) {
 				FlkPr flkPr = new FlkPr();
 				flkPr.setBASEL("CONS");
 				flkPr.setCOMMENT("001F.00.0390");
@@ -471,7 +524,7 @@ public class Q015ValidatorC {
 
 	// Не выяснил какой диапазон 0..6 или 1..7
 	private void _001F_00_0410(OnkSl onksl, Collection<FlkPr> prs) {
-		if (onksl != null && /** !n018Service.existsById(Integer.valueOf(onksl.getDS1T())) **/
+		if (onksl != null && /** !n018Service.isValid(Integer.valueOf(onksl.getDS1T())) **/
 				!(onksl.getDS1T() >= 1 && onksl.getDS1T() <= 7)) {
 			FlkPr flkPr = new FlkPr();
 			flkPr.setBASEL("ONK_SL");
@@ -511,7 +564,7 @@ public class Q015ValidatorC {
 			}
 		}
 	}
-	
+
 	private void _001F_00_0440(OnkSl onksl, Collection<FlkPr> prs, XMLGregorianCalendar persDr) {
 		if (onksl != null && onksl.getDS1T() == 3) {
 			LocalDate dr = LocalDate.of(persDr.getYear(), persDr.getMonth(), persDr.getDay());
@@ -526,4 +579,114 @@ public class Q015ValidatorC {
 			}
 		}
 	}
+
+	private void _001F_00_0450(OnkSl onksl, Collection<FlkPr> prs, XMLGregorianCalendar persDr) {
+		if (onksl != null && onksl.getDS1T() == 3) {
+			LocalDate dr = LocalDate.of(persDr.getYear(), persDr.getMonth(), persDr.getDay());
+			if (dr.plusYears(18).isBefore(LocalDate.now()) && !n005Service.isValid(Integer.valueOf(onksl.getONKM()))) {
+				FlkPr flkPr = new FlkPr();
+				flkPr.setBASEL("ONK_SL");
+				flkPr.setCOMMENT("001F.00.0450");
+				flkPr.setIMPOL("ONK_M");
+				flkPr.setOSHIB((short) 904);
+				flkPr.setZNPOL(String.valueOf(onksl.getONKN()));
+				prs.add(flkPr);
+			}
+		}
+	}
+
+	private void _001F_00_0460(BDIAG diag, Collection<FlkPr> prs) {
+		if (diag.getDIAGDATE() == null || diag.getDIAGTIP() != 0) {
+			if (diag.getDIAGTIP() == 1 && !n007Service.isValid(Integer.valueOf(diag.getDIAGCODE()))) {
+				FlkPr flkPr = new FlkPr();
+				flkPr.setBASEL("B_DIAG");
+				flkPr.setCOMMENT("001F.00.0460");
+				flkPr.setIMPOL("DIAG_CODE");
+				flkPr.setOSHIB((short) 904);
+				flkPr.setZNPOL(String.valueOf(diag.getDIAGCODE()));
+				prs.add(flkPr);
+			}
+		}
+	}
+
+	private void _001F_00_0470(BDIAG diag, Collection<FlkPr> prs) {
+		if (diag.getDIAGDATE() == null || diag.getDIAGTIP() != 0) {
+			if (diag.getDIAGTIP() == 2 && !n011Service.isValid(Integer.valueOf(diag.getDIAGCODE()))) {
+				FlkPr flkPr = new FlkPr();
+				flkPr.setBASEL("B_DIAG");
+				flkPr.setCOMMENT("001F.00.0470");
+				flkPr.setIMPOL("DIAG_CODE");
+				flkPr.setOSHIB((short) 904);
+				flkPr.setZNPOL(String.valueOf(diag.getDIAGCODE()));
+				prs.add(flkPr);
+			}
+		}
+	}
+
+	private void _001F_00_0480(BDIAG diag, Collection<FlkPr> prs) {
+		if (diag.getRECRSLT() == 1) {
+			if (diag.getDIAGTIP() == 1 && !n008Service.isValid(Integer.valueOf(diag.getDIAGRSLT()))) {
+				FlkPr flkPr = new FlkPr();
+				flkPr.setBASEL("B_DIAG");
+				flkPr.setCOMMENT("001F.00.0480");
+				flkPr.setIMPOL("DIAG_RSLT");
+				flkPr.setOSHIB((short) 904);
+				flkPr.setZNPOL(String.valueOf(diag.getDIAGRSLT()));
+				prs.add(flkPr);
+			}
+		}
+	}
+
+	private void _001F_00_0490(BDIAG diag, Collection<FlkPr> prs) {
+		if (diag.getRECRSLT() == 1) {
+			if (diag.getDIAGTIP() == 2 && !n011Service.isValid(Integer.valueOf(diag.getDIAGRSLT()))) {
+				FlkPr flkPr = new FlkPr();
+				flkPr.setBASEL("B_DIAG");
+				flkPr.setCOMMENT("001F.00.0480");
+				flkPr.setIMPOL("DIAG_RSLT");
+				flkPr.setOSHIB((short) 904);
+				flkPr.setZNPOL(String.valueOf(diag.getDIAGRSLT()));
+				prs.add(flkPr);
+			}
+		}
+	}
+
+	private void _001F_00_0500(BPROT prot, Collection<FlkPr> prs) {
+		if (!n001Service.isValid(Integer.valueOf(prot.getPROT()))) {
+			FlkPr flkPr = new FlkPr();
+			flkPr.setBASEL("B_PROT");
+			flkPr.setCOMMENT("001F.00.0500");
+			flkPr.setIMPOL("PROT");
+			flkPr.setOSHIB((short) 904);
+			flkPr.setZNPOL(String.valueOf(prot.getPROT()));
+			prs.add(flkPr);
+		}
+
+	}
+
+	private void _001F_00_0510(ONKUSL usl, Collection<FlkPr> prs) {
+		if (!n013Service.isValid(Integer.valueOf(usl.getUSLTIP()))) {
+			FlkPr flkPr = new FlkPr();
+			flkPr.setBASEL("ONK_USL");
+			flkPr.setCOMMENT("001F.00.0510");
+			flkPr.setIMPOL("USL_TIP");
+			flkPr.setOSHIB((short) 904);
+			flkPr.setZNPOL(String.valueOf(usl.getUSLTIP()));
+			prs.add(flkPr);
+		}
+
+	}
+
+	private void _001F_00_0520(ONKUSL usl, Collection<FlkPr> prs) {
+		if (usl.getUSLTIP() == 1 && !n014Service.isValid(Integer.valueOf(usl.getHIRTIP()))) {
+			FlkPr flkPr = new FlkPr();
+			flkPr.setBASEL("ONK_USL");
+			flkPr.setCOMMENT("001F.00.0520");
+			flkPr.setIMPOL("HIR_TIP");
+			flkPr.setOSHIB((short) 904);
+			flkPr.setZNPOL(String.valueOf(usl.getHIRTIP()));
+			prs.add(flkPr);
+		}
+	}
+
 }
