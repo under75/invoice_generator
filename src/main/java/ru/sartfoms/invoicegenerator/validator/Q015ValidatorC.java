@@ -15,6 +15,7 @@ import generated.BDIAG;
 import generated.BPROT;
 import generated.CONS;
 import generated.FlkPr;
+import generated.LEKPR;
 import generated.NAPR;
 import generated.ONKUSL;
 import generated.OnkSl;
@@ -27,6 +28,7 @@ import ru.sartfoms.invoicegenerator.service.F002Service;
 import ru.sartfoms.invoicegenerator.service.F003Service;
 import ru.sartfoms.invoicegenerator.service.F010Service;
 import ru.sartfoms.invoicegenerator.service.F032Service;
+import ru.sartfoms.invoicegenerator.service.MkbService;
 import ru.sartfoms.invoicegenerator.service.N001Service;
 import ru.sartfoms.invoicegenerator.service.N002Service;
 import ru.sartfoms.invoicegenerator.service.N003Service;
@@ -37,8 +39,12 @@ import ru.sartfoms.invoicegenerator.service.N008Service;
 import ru.sartfoms.invoicegenerator.service.N011Service;
 import ru.sartfoms.invoicegenerator.service.N013Service;
 import ru.sartfoms.invoicegenerator.service.N014Service;
+import ru.sartfoms.invoicegenerator.service.N015Service;
+import ru.sartfoms.invoicegenerator.service.N016Service;
+import ru.sartfoms.invoicegenerator.service.N017Service;
 import ru.sartfoms.invoicegenerator.service.N018Service;
 import ru.sartfoms.invoicegenerator.service.N019Service;
+import ru.sartfoms.invoicegenerator.service.N020Service;
 import ru.sartfoms.invoicegenerator.service.V002Service;
 import ru.sartfoms.invoicegenerator.service.V008Service;
 import ru.sartfoms.invoicegenerator.service.V009Service;
@@ -47,6 +53,8 @@ import ru.sartfoms.invoicegenerator.service.V012Service;
 import ru.sartfoms.invoicegenerator.service.V014Service;
 import ru.sartfoms.invoicegenerator.service.V020Service;
 import ru.sartfoms.invoicegenerator.service.V021Service;
+import ru.sartfoms.invoicegenerator.service.V023Service;
+import ru.sartfoms.invoicegenerator.service.V024Service;
 import ru.sartfoms.invoicegenerator.service.V025Service;
 import ru.sartfoms.invoicegenerator.service.V027Service;
 import ru.sartfoms.invoicegenerator.service.V028Service;
@@ -82,6 +90,13 @@ public class Q015ValidatorC {
 	private final N001Service n001Service;
 	private final N013Service n013Service;
 	private final N014Service n014Service;
+	private final N015Service n015Service;
+	private final N016Service n016Service;
+	private final N017Service n017Service;
+	private final N020Service n020Service;
+	private final MkbService mkbService;
+	private final V024Service v024Service;
+	private final V023Service v023Service;
 
 	public Q015ValidatorC(F003Service f003Service, F032Service f032Service, F002Service f002Service,
 			F010Service f010Service, V008Service v008Service, V014Service v014Service, V009Service v009Service,
@@ -89,7 +104,9 @@ public class Q015ValidatorC {
 			V025Service v025Service, V027Service v027Service, V021Service v021Service, V028Service v028Service,
 			V029Service v029Service, N019Service n019Service, N018Service n018Service, N002Service n002Service,
 			N003Service n003Service, N004Service n004Service, N005Service n005Service, N007Service n007Service,
-			N011Service n011Service, N008Service n008Service, N001Service n001Service, N013Service n013Service, N014Service n014Service) {
+			N011Service n011Service, N008Service n008Service, N001Service n001Service, N013Service n013Service,
+			N014Service n014Service, N015Service n015Service, N016Service n016Service, N017Service n017Service,
+			N020Service n020Service, MkbService mkbService, V024Service v024Service, V023Service v023Service) {
 		this.f003Service = f003Service;
 		this.f032Service = f032Service;
 		this.f002Service = f002Service;
@@ -118,9 +135,16 @@ public class Q015ValidatorC {
 		this.n001Service = n001Service;
 		this.n013Service = n013Service;
 		this.n014Service = n014Service;
+		this.n015Service = n015Service;
+		this.n016Service = n016Service;
+		this.n017Service = n017Service;
+		this.n020Service = n020Service;
+		this.mkbService = mkbService;
+		this.v024Service = v024Service;
+		this.v023Service = v023Service;
 	}
 
-	public void validate(Cortege cortege) { 
+	public void validate(Cortege cortege) {
 		Collection<FlkPr> prs = cortege.getFlk().getPR();
 		Schet schet = cortege.getSvedMedpom().getSCHET();
 
@@ -232,8 +256,27 @@ public class Q015ValidatorC {
 
 						// 001F.00.0520
 						_001F_00_0520(usl, prs);
+
+						// 001F.00.0530
+						_001F_00_0530(usl, prs);
+
+						// 001F.00.0540
+						_001F_00_0540(usl, prs);
+
+						// 001F.00.0550
+						_001F_00_0550(usl, prs);
+
+						usl.getLEKPR().forEach(lekpr -> {
+							// 001F.00.0560
+							_001F_00_0560(lekpr, prs);
+
+							// 001F.00.0571
+							_001F_00_0571(usl.getUSLTIP(), lekpr, prs, person.getDR(), sluch.getDS1());
+						});
 					});
 				}
+				// 001F.00.0580
+				_001F_00_0580(prs, sluch);
 
 			});
 
@@ -686,6 +729,89 @@ public class Q015ValidatorC {
 			flkPr.setOSHIB((short) 904);
 			flkPr.setZNPOL(String.valueOf(usl.getHIRTIP()));
 			prs.add(flkPr);
+		}
+	}
+
+	private void _001F_00_0530(ONKUSL usl, Collection<FlkPr> prs) {
+		if (usl.getUSLTIP() == 2 && !n015Service.isValid(Integer.valueOf(usl.getLEKTIPL()))) {
+			FlkPr flkPr = new FlkPr();
+			flkPr.setBASEL("ONK_USL");
+			flkPr.setCOMMENT("001F.00.0530");
+			flkPr.setIMPOL("LEK_TIP_L");
+			flkPr.setOSHIB((short) 904);
+			flkPr.setZNPOL(String.valueOf(usl.getLEKTIPL()));
+			prs.add(flkPr);
+		}
+	}
+
+	private void _001F_00_0540(ONKUSL usl, Collection<FlkPr> prs) {
+		if (usl.getUSLTIP() == 2 && !n016Service.isValid(Integer.valueOf(usl.getLEKTIPV()))) {
+			FlkPr flkPr = new FlkPr();
+			flkPr.setBASEL("ONK_USL");
+			flkPr.setCOMMENT("001F.00.0540");
+			flkPr.setIMPOL("LEK_TIP_V");
+			flkPr.setOSHIB((short) 904);
+			flkPr.setZNPOL(String.valueOf(usl.getLEKTIPV()));
+			prs.add(flkPr);
+		}
+	}
+
+	private void _001F_00_0550(ONKUSL usl, Collection<FlkPr> prs) {
+		if ((usl.getUSLTIP() == 3 || usl.getUSLTIP() == 4) && !n017Service.isValid(Integer.valueOf(usl.getLUCHTIP()))) {
+			FlkPr flkPr = new FlkPr();
+			flkPr.setBASEL("ONK_USL");
+			flkPr.setCOMMENT("001F.00.0550");
+			flkPr.setIMPOL("LUCH_TIP");
+			flkPr.setOSHIB((short) 904);
+			flkPr.setZNPOL(String.valueOf(usl.getLUCHTIP()));
+			prs.add(flkPr);
+		}
+	}
+
+	private void _001F_00_0560(LEKPR lekpr, Collection<FlkPr> prs) {
+		if (!n020Service.isValid(lekpr.getREGNUM())) {
+			FlkPr flkPr = new FlkPr();
+			flkPr.setBASEL("LEK_PR");
+			flkPr.setCOMMENT("001F.00.0560");
+			flkPr.setIMPOL("REGNUM");
+			flkPr.setOSHIB((short) 904);
+			flkPr.setZNPOL(lekpr.getREGNUM());
+			prs.add(flkPr);
+		}
+	}
+
+	private void _001F_00_0571(Short usltip, LEKPR lekpr, Collection<FlkPr> prs, XMLGregorianCalendar persDr,
+			String ds1) {
+		LocalDate dr = LocalDate.of(persDr.getYear(), persDr.getMonth(), persDr.getDay());
+		if (dr.plusYears(18).isBefore(LocalDate.now())
+				&& (mkbService.isBetweenExcludingTo(ds1, "C00.0", "C81")
+						|| (mkbService.isBetweenExcludingTo(ds1, "C81.0", "C97") && usltip == 2)
+						|| mkbService.isBetweenExcludingFromAndTo(ds1, "C96", "D10")
+						|| (mkbService.isBetweenExcludingTo(ds1, "D45", "D48") && usltip == 2))) {
+			if (!v024Service.isValid(lekpr.getCODESH())) {
+				FlkPr flkPr = new FlkPr();
+				flkPr.setBASEL("LEK_PR");
+				flkPr.setCOMMENT("001F.00.0571");
+				flkPr.setIMPOL("CODE_SH");
+				flkPr.setOSHIB((short) 904);
+				flkPr.setZNPOL(lekpr.getCODESH());
+				prs.add(flkPr);
+			}
+		}
+	}
+	
+	private void _001F_00_0580(Collection<FlkPr> prs, Sluch sluch) {
+		if (sluch.getKSGKPG() != null && sluch.getKSGKPG().getNKPG() == null && sluch.getKSGKPG().getKSGPG() == 0) {
+			String nksg = sluch.getKSGKPG().getNKSG();
+			if (nksg == null || !v023Service.isValid(nksg)) {
+				FlkPr flkPr = new FlkPr();
+				flkPr.setBASEL("KSG_KPG");
+				flkPr.setCOMMENT("001F.00.0580");
+				flkPr.setIMPOL("N_KSG");
+				flkPr.setOSHIB(nksg == null ? (short) 902 : (short) 904);
+				flkPr.setZNPOL(nksg);
+				prs.add(flkPr);
+			}
 		}
 	}
 
